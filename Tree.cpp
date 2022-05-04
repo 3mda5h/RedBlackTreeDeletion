@@ -199,59 +199,117 @@ Node* Tree::search(int number)
 void Tree::remove(int number)
 {
   Node* removeThis = search(number);
-  if(strcmp(removeThis->color, "red") == 0) //deleting a red node doesnt change total # of blacks
+  Node* parent = removeThis->parent;
+  if(removeThis->left == NULL && removeThis->right == NULL && strcmp(removeThis->color, "red") == 0) //removeThis has no children and is red  
   {
-    Node* parent = removeThis->parent;
-    //1. removeThis has no children
-    if(removeThis->left == NULL && removeThis->right == NULL)  
-    {
-      if(removeThis->number > parent->number) parent->right = NULL;
-      else parent->left = NULL;
-      delete removeThis;
-      cout << "Number removed" << endl;
-      return;
-    }
-    
-    //2. removeThis has only has one child - remove it and connect its child with parent of removeThis
-    if(removeThis->left == NULL ^ removeThis->right == NULL) //^ = exclusive or - returns true if only one of the statements is true (so if one child is null but not both)
-    {
-      if(removeThis->number > parent->number) //removeThis is the right child of parent
-      {
-        if(removeThis->right != NULL) parent->right = removeThis->right; //removeThis has a right child, connect this child with parent of removeThis
-        else parent->right = removeThis->left;
-      }
-      else //removeThis is the left child of parent
-      {
-        if(removeThis->right != NULL) parent->left = removeThis->right; 
-        else parent->left = removeThis->left;
-      }
-      delete removeThis;
-      cout << "Number removed" << endl;
-      return;
-    }
-  
-    //3. removeThis has two children - find next largest number (right once, then left until end)
-    Node* previous = removeThis;
-    Node* nextLargest = removeThis->right;
-    while(nextLargest->left != NULL) 
-    {
-      previous = nextLargest;
-      nextLargest = nextLargest->left;
-    }
-    removeThis->number = nextLargest->number; //replacing the number were removing with the next largest number in tree
-    if(removeThis == previous)//found next highest by just going right once
-    {
-      if(nextLargest->right != NULL) previous->right = nextLargest->right;
-      else previous->right = NULL;
-    }
-    else //had to go left to find next highest
-    {
-      if(nextLargest->right != NULL) previous->left = nextLargest->right;
-      else previous->left = NULL; 
-    }
-    delete nextLargest;
+    if(removeThis->number > parent->number) parent->right = NULL;
+    else parent->left = NULL;
+    delete removeThis;
     cout << "Number removed" << endl;
+    return;
   }
+  
+  //2. removeThis has only has one non-leaf child
+  if(removeThis->left == NULL ^ removeThis->right == NULL) //^ = exclusive or - returns true if only one of the statements is true (so if one child is null but not both)
+  {
+    Node* child;
+    if(removeThis->right == NULL) child = removeThis->left;
+    else child = removeThis->right;
+    //one black the other red
+    if(strcmp(removeThis->color, "red") == 0 || (strcmp(removeThis->color, "black") == 0 && strcmp(child->color, "red") == 0)) 
+    {
+      replace(removeThis, child);
+      if(strcmp(child->color, "red") == 0) child->color = "black"; //if removeThis was black and child was red
+    }
+    //both black
+    if(strcmp(removeThis->color, "black") == 0 && strcmp(child->color, "black")
+    {
+      replace(removeThis, child);
+      Node* node = child;
+      Node* parent = node->parent;
+      Node* sibling;
+      if(node == node->parent->left) sibling = node->parent->right
+      else sibling = node->parent->left;
+      //1. node is new root - dont really do anything?
+      //2. sibling is red - rotate sibling thru parent
+      if(sibling != NULL && strcmp(sibling->color, "red") == 0)
+      {
+        //is this the same rotation as used before??
+        if(sibing == sibling->parent->right)
+        {
+          if(parent->parent != NULL)
+          {
+            if(parent == parent->parent->left) parent->parent->left = sibling
+            else parent->parent->right = sibling
+          }
+          sibling->parent = parent->parent;
+          parent->right = sibling->left
+          sibling->left = parent;
+        }
+        else if(sibing == sibling->parent->left)
+        {
+          if(parent->parent != NULL)
+          {
+            if(parent == parent->parent->left) parent->parent->left = sibling
+            else parent->parent->right = sibling
+          }
+          sibling->parent = parent->parent;
+          parent->left = sibling->right
+          sibling->right = parent;
+        }
+      }
+    }
+    /*if(removeThis->number > parent->number) //removeThis is the right child of parent
+    {
+      if(removeThis->right != NULL) parent->right = removeThis->right; //removeThis has a right child, connect this child with parent of removeThis
+      else parent->right = removeThis->left;
+    }
+    else //removeThis is the left child of parent
+    {
+      if(removeThis->right != NULL) parent->left = removeThis->right; 
+      else parent->left = removeThis->left;
+    }
+    delete removeThis;
+    cout << "Number removed" << endl;
+    return; */
+    }
+
+  //3. removeThis has two children - find next largest number (right once, then left until end)
+  Node* previous = removeThis;
+  Node* nextLargest = removeThis->right;
+  while(nextLargest->left != NULL) 
+  {
+    previous = nextLargest;
+    nextLargest = nextLargest->left;
+  }
+  removeThis->number = nextLargest->number; //replacing the number were removing with the next largest number in tree
+  if(removeThis == previous)//found next highest by just going right once
+  {
+    if(nextLargest->right != NULL) previous->right = nextLargest->right;
+    else previous->right = NULL;
+  }
+  else //had to go left to find next highest
+  {
+    if(nextLargest->right != NULL) previous->left = nextLargest->right;
+    else previous->left = NULL; 
+  }
+  delete nextLargest;
+  cout << "Number removed" << endl;
+}
+
+//child goes into parent's spot, parent is deleted
+void Tree::replace(Node* removeThis, Node* child)
+{
+  if(removeThis == removeThis->parent->right) removeThis->parent->right = child;
+  else removeThis->parent->left = child;
+  child->parent = removeThis->parent;
+  if(root == removeThis) root = child;
+  delete removeThis;
+}
+
+void Tree::rotateThroughParent()
+{
+  
 }
 
 void Tree::display()

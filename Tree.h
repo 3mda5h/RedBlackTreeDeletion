@@ -25,6 +25,8 @@ class Tree
   void caseThree(Node* current);
   Node* search(int number);
   void remove(int number);
+  void replace(Node* parent, Node* child);
+  void rotateThroughParent(Node* node);
   void display();
   void display_impl(Node* current, int level);
   void printTabs(int level);
