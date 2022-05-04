@@ -72,7 +72,7 @@ void Tree::fixInsert(Node* node)
   //3. parent and uncle of node are red - change parent and uncle to black, grandparent to red
   if(strcmp(node->color, "red") == 0 && strcmp(parent->color, "red") == 0 && uncle != NULL && strcmp(uncle->color, "red") == 0)
   {    
-    caseThree(node);
+    caseThreeIns(node);
     //fix tree higher up
     Node* current = grandpa;
     while(current != NULL && current->parent != NULL && current->parent->parent != NULL)
@@ -166,7 +166,7 @@ void Tree::fixInsert(Node* node)
 }
 
 //3. parent and uncle of node are red - change parent and uncle to black, grandparent to red
-void Tree::caseThree(Node* node)
+void Tree::caseThreeIns(Node* node)
 {
   if(node != NULL && node->parent != NULL && node->parent->parent != NULL)
   {
@@ -179,7 +179,7 @@ void Tree::caseThree(Node* node)
       node->parent->color = "black";       
       uncle->color = "black";
       if(grandpa != NULL && grandpa != root) grandpa->color = "red";
-      caseThree(grandpa);
+      caseThreeIns(grandpa);
     }
   }
 }
@@ -230,7 +230,8 @@ void Tree::remove(int number)
       Node* sibling;
       if(node == node->parent->left) sibling = node->parent->right
       else sibling = node->parent->left;
-      //1. node is new root - dont really do anything?
+      //1. node is new root
+      if(node == root) return;
       //2. sibling is red - rotate sibling thru parent
       if(sibling != NULL && strcmp(sibling->color, "red") == 0)
       {
@@ -245,6 +246,7 @@ void Tree::remove(int number)
           sibling->parent = parent->parent;
           parent->right = sibling->left
           sibling->left = parent;
+          sibling = parent->right;
         }
         else if(sibing == sibling->parent->left)
         {
@@ -256,6 +258,35 @@ void Tree::remove(int number)
           sibling->parent = parent->parent;
           parent->left = sibling->right
           sibling->right = parent;
+          sibling = parent->left;
+        }
+      }
+      //3. sibling is black
+      if(sibling == NULL || strcmp(sibling->color, "black") == 0)
+      {
+        sibling->color = "red";
+        //case 1;
+        if(parent == root) return;
+      }
+      //4. parent is read sibling and sibling's children are black
+      if(strcmp(sibling->color, "black") == 0 && (sibling->left == NULL || strcmp(sibling->left->color, "black") == 0) 
+        && (sibling->right != NULL || strcmp(sibling->right->color, "black") == 0))
+      {
+        parent->color = "black";
+        sibling->color = "red";
+      }
+      //5 - rotate thru sibling
+      if(strcmp(sibling->color, "black") == 0 && (strcmp(sibling->right->color, "red") == 0 ^ strcmp(sibling->left->color, "red") == 0)) //if one of sibling's children is red not both
+      {
+        if(sibling == parent->left && strcmp(sibling->right->color, "red") == 0) //sibling left of parent, red child right of sibling
+        {
+          sibling->color = "red";
+          sibling->right->color = "black"
+        }
+        else if(sibling == parent->right && strcmp(sibling->left->color, "red") == 0)
+        {
+          sibling->color = "red";
+          sibling->left->color = "black"
         }
       }
     }
@@ -305,11 +336,6 @@ void Tree::replace(Node* removeThis, Node* child)
   child->parent = removeThis->parent;
   if(root == removeThis) root = child;
   delete removeThis;
-}
-
-void Tree::rotateThroughParent()
-{
-  
 }
 
 void Tree::display()
