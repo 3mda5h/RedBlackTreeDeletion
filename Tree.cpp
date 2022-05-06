@@ -165,7 +165,7 @@ void Tree::fixInsert(Node* node)
   }
 }
 
-//3. parent and uncle of node are red - change parent and uncle to black, grandparent to red
+//(for insertion!!) parent and uncle of node are red - change parent and uncle to black, grandparent to red
 void Tree::caseThreeIns(Node* node)
 {
   if(node != NULL && node->parent != NULL && node->parent->parent != NULL)
@@ -196,136 +196,154 @@ Node* Tree::search(int number)
   else return current;
 }
 
-void Tree::remove(int number)
+//find right node to remove
+void Tree::preRemove(int number)
 {
   Node* removeThis = search(number);
-  Node* parent = removeThis->parent;
-  if(removeThis->left == NULL && removeThis->right == NULL && strcmp(removeThis->color, "red") == 0) //removeThis has no children and is red  
+  //removeThis has two children - find next smallest number (left once, then right until end)
+  if(removeThis->left != NULL && removeThis->right != NULL)
   {
-    if(removeThis->number > parent->number) parent->right = NULL;
-    else parent->left = NULL;
-    delete removeThis;
-    cout << "Number removed" << endl;
-    return;
+    Node* previous = removeThis;
+    Node* nextSmallest = removeThis->left;
+    while(nextSmallest->right != NULL) 
+    {
+      previous = nextSmallest;
+      nextSmallest = nextSmallest->right;
+    }
+    removeThis->number = nextSmallest->number; //replacing the number we're removing with the next smallest number in tree
+    //now the one we actually want to delete is nextSmallest
+    remove(nextSmallest);
   }
-  
-  //2. removeThis has only has one non-leaf child
-  if(removeThis->left == NULL ^ removeThis->right == NULL) //^ = exclusive or - returns true if only one of the statements is true (so if one child is null but not both)
-  {
-    Node* child;
-    if(removeThis->right == NULL) child = removeThis->left;
-    else child = removeThis->right;
-    //one black the other red
-    if(strcmp(removeThis->color, "red") == 0 || (strcmp(removeThis->color, "black") == 0 && strcmp(child->color, "red") == 0)) 
-    {
-      replace(removeThis, child);
-      if(strcmp(child->color, "red") == 0) child->color = "black"; //if removeThis was black and child was red
-    }
-    //both black
-    if(strcmp(removeThis->color, "black") == 0 && strcmp(child->color, "black")
-    {
-      replace(removeThis, child);
-      Node* node = child;
-      Node* parent = node->parent;
-      Node* sibling;
-      if(node == node->parent->left) sibling = node->parent->right
-      else sibling = node->parent->left;
-      //1. node is new root
-      if(node == root) return;
-      //2. sibling is red - rotate sibling thru parent
-      if(sibling != NULL && strcmp(sibling->color, "red") == 0)
-      {
-        //is this the same rotation as used before??
-        if(sibing == sibling->parent->right)
-        {
-          if(parent->parent != NULL)
-          {
-            if(parent == parent->parent->left) parent->parent->left = sibling
-            else parent->parent->right = sibling
-          }
-          sibling->parent = parent->parent;
-          parent->right = sibling->left
-          sibling->left = parent;
-          sibling = parent->right;
-        }
-        else if(sibing == sibling->parent->left)
-        {
-          if(parent->parent != NULL)
-          {
-            if(parent == parent->parent->left) parent->parent->left = sibling
-            else parent->parent->right = sibling
-          }
-          sibling->parent = parent->parent;
-          parent->left = sibling->right
-          sibling->right = parent;
-          sibling = parent->left;
-        }
-      }
-      //3. sibling is black
-      if(sibling == NULL || strcmp(sibling->color, "black") == 0)
-      {
-        sibling->color = "red";
-        //case 1;
-        if(parent == root) return;
-      }
-      //4. parent is read sibling and sibling's children are black
-      if(strcmp(sibling->color, "black") == 0 && (sibling->left == NULL || strcmp(sibling->left->color, "black") == 0) 
-        && (sibling->right != NULL || strcmp(sibling->right->color, "black") == 0))
-      {
-        parent->color = "black";
-        sibling->color = "red";
-      }
-      //5 - rotate thru sibling
-      if(strcmp(sibling->color, "black") == 0 && (strcmp(sibling->right->color, "red") == 0 ^ strcmp(sibling->left->color, "red") == 0)) //if one of sibling's children is red not both
-      {
-        if(sibling == parent->left && strcmp(sibling->right->color, "red") == 0) //sibling left of parent, red child right of sibling
-        {
-          sibling->color = "red";
-          sibling->right->color = "black"
-        }
-        else if(sibling == parent->right && strcmp(sibling->left->color, "red") == 0)
-        {
-          sibling->color = "red";
-          sibling->left->color = "black"
-        }
-      }
-    }
-    /*if(removeThis->number > parent->number) //removeThis is the right child of parent
-    {
-      if(removeThis->right != NULL) parent->right = removeThis->right; //removeThis has a right child, connect this child with parent of removeThis
-      else parent->right = removeThis->left;
-    }
-    else //removeThis is the left child of parent
-    {
-      if(removeThis->right != NULL) parent->left = removeThis->right; 
-      else parent->left = removeThis->left;
-    }
-    delete removeThis;
-    cout << "Number removed" << endl;
-    return; */
-    }
+  else remove(removeThis);
+} 
 
-  //3. removeThis has two children - find next largest number (right once, then left until end)
-  Node* previous = removeThis;
-  Node* nextLargest = removeThis->right;
-  while(nextLargest->left != NULL) 
+//removes node, fixes simple case
+void Tree::remove(Node* removeThis)
+{
+  Node* child;
+  Node* node;
+  Node* sibling;
+  Node* parent;
+  if(removeThis->right == NULL) child = removeThis->left;
+  else child = removeThis->right;
+  //one black the other red
+  if(strcmp(removeThis->color, "red") == 0 || (strcmp(removeThis->color, "black") == 0 && strcmp(child->color, "red") == 0)) 
   {
-    previous = nextLargest;
-    nextLargest = nextLargest->left;
+    replace(removeThis, child);
+    if(strcmp(child->color, "red") == 0) child->color = "black"; //if removeThis was black and child was red
   }
-  removeThis->number = nextLargest->number; //replacing the number were removing with the next largest number in tree
-  if(removeThis == previous)//found next highest by just going right once
+  //both black
+  if(strcmp(removeThis->color, "black") == 0 && strcmp(child->color, "black"))
   {
-    if(nextLargest->right != NULL) previous->right = nextLargest->right;
-    else previous->right = NULL;
+    replace(removeThis, child);
+    bothBlack(removeThis);
   }
-  else //had to go left to find next highest
+}
+
+//fixes red-black property in the more complex cases
+void Tree::bothBlack(Node* removeThis)
+{
+  Node* child;
+  Node* node;
+  Node* sibling;
+  Node* parent;
+  if(removeThis->right == NULL) child = removeThis->left;
+  else child = removeThis->right;
+  node = child;
+  parent = node->parent;
+  if(node == node->parent->left) sibling = node->parent->right;
+  else sibling = node->parent->left;
+  //1. node is new root
+  if(node == root) return;
+  //2. sibling is red - rotate sibling thru parent
+  if(sibling != NULL && strcmp(sibling->color, "red") == 0)
   {
-    if(nextLargest->right != NULL) previous->left = nextLargest->right;
-    else previous->left = NULL; 
+    Node* parent = sibling->parent;
+    if(sibling == sibling->parent->right)
+    {
+      if(parent->parent != NULL)
+      {
+        if(parent == parent->parent->left) parent->parent->left = sibling;
+        else parent->parent->right = sibling;
+      }
+      sibling->parent = parent->parent;
+      parent->right = sibling->left;
+      sibling->left = parent;
+      sibling = parent->right;
+    }
+    else if(sibling == sibling->parent->left)
+    {
+      if(parent->parent != NULL)
+      {
+        if(parent == parent->parent->left) parent->parent->left = sibling;
+        else parent->parent->right = sibling;
+      }
+      sibling->parent = parent->parent;
+      parent->left = sibling->right;
+      sibling->right = parent;
+      sibling = parent->left;
+    }
   }
-  delete nextLargest;
-  cout << "Number removed" << endl;
+  //3. sibling is black
+  if(sibling == NULL || strcmp(sibling->color, "black") == 0)
+  {
+    sibling->color = "red";
+    //case 2 recursive call hehe
+    //get sibling of parent
+    remove(parent);
+  }
+  //4. parent is red sibling and sibling's children are black
+  if(strcmp(sibling->color, "black") == 0 && (sibling->left == NULL || strcmp(sibling->left->color, "black") == 0) 
+    && (sibling->right != NULL || strcmp(sibling->right->color, "black") == 0))
+  {
+    parent->color = "black";
+    sibling->color = "red";
+  }
+  //5 - rotate thru sibling
+  if(strcmp(sibling->color, "black") == 0 && (strcmp(sibling->right->color, "red") == 0 ^ strcmp(sibling->left->color, "red") == 0)) //if one of sibling's children is red not both
+  {
+    if(sibling == parent->left && strcmp(sibling->right->color, "red") == 0) //sibling left of parent, red child right of sibling
+    {
+      Node* siblingR = sibling->right;
+      sibling->color = "red";
+      siblingR->color = "black";
+      parent->right = siblingR;
+      siblingR->parent = parent;
+      sibling->right = siblingR->left;
+      siblingR->left = sibling;
+      sibling->parent = siblingR;
+    }
+    else if(sibling == parent->right && strcmp(sibling->left->color, "red") == 0)
+    {
+      Node* siblingL = sibling->left;
+      sibling->color = "red";
+      sibling->left->color = "black";
+      parent->left = siblingL;
+      siblingL->parent = parent;
+      sibling->right = siblingL->left;
+      siblingL->left = sibling;
+      sibling->parent = siblingL;
+    }
+  }
+  //6 - sibling is black, sibling's left is red, node is right (or directions opposite)
+  //rotate thru the parent and 
+  if(strcmp(sibling->color, "black") == 0 && strcmp(sibling->left->color, "red") == 0 && node == parent->right)
+  {
+    //switch parent's colors with the sibling
+    if(strcmp(parent->color, "red") == 0) sibling->color = "red";
+    parent->color = "black";
+      
+  }
+  else if(strcmp(sibling->color, "black") == 0 && strcmp(sibling->right->color, "red") == 0 && node == parent->left)
+  {
+    
+  }
+}
+
+//for deletion  - do i need this?
+void Tree::caseTwo(Node* sibling)
+{
+  
 }
 
 //child goes into parent's spot, parent is deleted
