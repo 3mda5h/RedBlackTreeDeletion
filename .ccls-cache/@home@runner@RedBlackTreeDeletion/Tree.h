@@ -23,11 +23,9 @@ class Tree
   void insert_impl(Node* current, int number); //implementation functions so main doesn't have to acess root
   void fixInsert(Node* newChild);
   void caseThreeIns(Node* current);
-  void caseThreeDel(Node* current);
   Node* search(int number);
   void preRemove(int number);
   void remove(Node* removeThis);
-  void caseTwo(Node* sibling);
   void bothBlack(Node* removeThis);
   void replace(Node* parent, Node* child);
   void display();

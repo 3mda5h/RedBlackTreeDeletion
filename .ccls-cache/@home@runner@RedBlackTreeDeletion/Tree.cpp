@@ -203,15 +203,17 @@ void Tree::preRemove(int number)
   //removeThis has two children - find next smallest number (left once, then right until end)
   if(removeThis->left != NULL && removeThis->right != NULL)
   {
-    Node* previous = removeThis;
+    //Node* previous = removeThis;
     Node* nextSmallest = removeThis->left;
     while(nextSmallest->right != NULL) 
     {
-      previous = nextSmallest;
+      //previous = nextSmallest;
       nextSmallest = nextSmallest->right;
     }
     removeThis->number = nextSmallest->number; //replacing the number we're removing with the next smallest number in tree
     //now the one we actually want to delete is nextSmallest
+    cout << "after preRemove:" << endl;
+    display();
     remove(nextSmallest);
   }
   else remove(removeThis);
@@ -221,8 +223,6 @@ void Tree::preRemove(int number)
 void Tree::remove(Node* removeThis)
 {
   Node* child;
-  Node* node;
-  Node* sibling;
   Node* parent;
   if(removeThis->right == NULL) child = removeThis->left;
   else child = removeThis->right;
@@ -329,21 +329,31 @@ void Tree::bothBlack(Node* removeThis)
   //rotate thru the parent and 
   if(strcmp(sibling->color, "black") == 0 && strcmp(sibling->left->color, "red") == 0 && node == parent->right)
   {
-    //switch parent's colors with the sibling
+    //parent and sibling colors switch, sibling child becomes black
     if(strcmp(parent->color, "red") == 0) sibling->color = "red";
     parent->color = "black";
+    sibling->left->color = "black";
+    Node* siblingR = sibling->right;
+    parent->left = siblingR;
+    siblingR->parent = parent;
+    sibling->left = parent;
+    parent->parent = sibling;
+    if(parent == root) root = sibling;
       
   }
   else if(strcmp(sibling->color, "black") == 0 && strcmp(sibling->right->color, "red") == 0 && node == parent->left)
   {
-    
+   //parent and sibling colors switch, sibling child becomes black
+    if(strcmp(parent->color, "red") == 0) sibling->color = "red";
+    parent->color = "black";
+    sibling->right->color = "black";
+    Node* siblingL = sibling->left;
+    parent->right = siblingL;
+    siblingL->parent = parent;
+    sibling->right = parent;
+    parent->parent = sibling;
+    if(parent == root) root = sibling;
   }
-}
-
-//for deletion  - do i need this?
-void Tree::caseTwo(Node* sibling)
-{
-  
 }
 
 //child goes into parent's spot, parent is deleted
@@ -351,7 +361,10 @@ void Tree::replace(Node* removeThis, Node* child)
 {
   if(removeThis == removeThis->parent->right) removeThis->parent->right = child;
   else removeThis->parent->left = child;
+  cout << "got here" << endl;
   child->parent = removeThis->parent;
+    cout << "got here" << endl;
+
   if(root == removeThis) root = child;
   delete removeThis;
 }

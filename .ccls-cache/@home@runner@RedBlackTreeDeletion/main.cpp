@@ -36,7 +36,7 @@ int main()
     {
       cout << "Number?" << endl;
       cin.getline(input, 100);
-      //tree->remove(atoi(input));
+      tree->preRemove(atoi(input));
     }
     else if(strcmp(input, "search") == 0)
     {
