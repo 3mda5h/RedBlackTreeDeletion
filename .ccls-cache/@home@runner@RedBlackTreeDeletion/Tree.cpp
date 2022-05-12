@@ -224,14 +224,28 @@ void Tree::preRemove(int number)
 void Tree::remove(Node* removeThis)
 {
   Node* child;
-  Node* parent;
+  Node* parent = removeThis->parent;
   if(removeThis->right == NULL) child = removeThis->left;
   else child = removeThis->right;
   //both black
   if(strcmp(removeThis->color, "black") == 0 && (child == NULL || strcmp(child->color, "black")))
   {
     replace(removeThis, child);
-    bothBlack(parent, child); //passing in the parent bc the child could be null
+     cout << "after remove:" << endl;
+    display();
+    //now get sibling so we can call both black
+    Node* sibling;  
+    if(child == NULL) //if node is null the sibling is the non null chld of parent
+    {
+      if(parent->right != NULL) sibling = parent->right;
+      else sibling = child->parent->left;
+    }
+    else
+    {
+      if(child == parent->left) sibling = parent->right;
+      else sibling = child->parent->left;
+    }
+    bothBlack(parent, child, sibling); //passing in the parent bc the child could be null
   }
   //one black the other red
   else if(strcmp(removeThis->color, "red") == 0 || (strcmp(removeThis->color, "black") == 0 && strcmp(child->color, "red") == 0)) 
@@ -251,13 +265,15 @@ void Tree::replace(Node* removeThis, Node* child)
   delete removeThis;
 }
 
-//fixes red-black property when node removed and its child are black
-void Tree::bothBlack(Node* parent, Node* node) 
+//fixes red-black property when node removed and its child are black (double black)
+void Tree::bothBlack(Node* parent, Node* node, Node* sibling) 
 {
-  //'parent' here is the parent of the node that replaced removeThis  
-  Node* sibling; 
-  if(node == parent->left) sibling = parent->right;
-  else sibling = node->parent->left;
+  //'node' here is the node that replaced removeThis  
+  //node is a double black node meaning the path from the root to node contains 1 less black node than it should
+  //this is because node's parent was black and he was deleted, decreasing black count by 1
+  //node can be NULL 
+  //can sibling be null ?? - probably not right??
+
   //1. node is new root
   if(node == root) return;
   //2. sibling is red - rotate sibling thru parent
@@ -294,8 +310,9 @@ void Tree::bothBlack(Node* parent, Node* node)
   {
     sibling->color = "red";
     //case 2 recursive call hehe
-    //get sibling of parent
-    remove(parent);
+    //go back to case 1
+    bothBlack(parent, node, sibling);
+    
   }
   //4. parent is red sibling and sibling's children are black
   if(strcmp(sibling->color, "black") == 0 && (sibling->left == NULL || strcmp(sibling->left->color, "black") == 0) 
