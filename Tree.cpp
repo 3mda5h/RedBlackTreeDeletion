@@ -184,6 +184,7 @@ void Tree::caseThreeIns(Node* node)
   }
 }
 
+//finds node with given number, returns that node
 Node* Tree::search(int number)
 {
   Node* current = root;
@@ -196,7 +197,7 @@ Node* Tree::search(int number)
   else return current;
 }
 
-//find right node to remove
+//find correct node to remove
 void Tree::preRemove(int number)
 {
   Node* removeThis = search(number);
@@ -226,32 +227,36 @@ void Tree::remove(Node* removeThis)
   Node* parent;
   if(removeThis->right == NULL) child = removeThis->left;
   else child = removeThis->right;
+  //both black
+  if(strcmp(removeThis->color, "black") == 0 && (child == NULL || strcmp(child->color, "black")))
+  {
+    replace(removeThis, child);
+    bothBlack(parent, child); //passing in the parent bc the child could be null
+  }
   //one black the other red
-  if(strcmp(removeThis->color, "red") == 0 || (strcmp(removeThis->color, "black") == 0 && strcmp(child->color, "red") == 0)) 
+  else if(strcmp(removeThis->color, "red") == 0 || (strcmp(removeThis->color, "black") == 0 && strcmp(child->color, "red") == 0)) 
   {
     replace(removeThis, child);
     if(strcmp(child->color, "red") == 0) child->color = "black"; //if removeThis was black and child was red
   }
-  //both black
-  if(strcmp(removeThis->color, "black") == 0 && strcmp(child->color, "black"))
-  {
-    replace(removeThis, child);
-    bothBlack(removeThis);
-  }
 }
 
-//fixes red-black property in the more complex cases
-void Tree::bothBlack(Node* removeThis)
+//child goes into parent's spot, parent is deleted
+void Tree::replace(Node* removeThis, Node* child)
 {
-  Node* child;
-  Node* node;
-  Node* sibling;
-  Node* parent;
-  if(removeThis->right == NULL) child = removeThis->left;
-  else child = removeThis->right;
-  node = child;
-  parent = node->parent;
-  if(node == node->parent->left) sibling = node->parent->right;
+  if(removeThis == removeThis->parent->right) removeThis->parent->right = child;
+  else removeThis->parent->left = child;
+  if(child != NULL) child->parent = removeThis->parent;
+  if(root == removeThis) root = child;
+  delete removeThis;
+}
+
+//fixes red-black property when node removed and its child are black
+void Tree::bothBlack(Node* parent, Node* node) 
+{
+  //'parent' here is the parent of the node that replaced removeThis  
+  Node* sibling; 
+  if(node == parent->left) sibling = parent->right;
   else sibling = node->parent->left;
   //1. node is new root
   if(node == root) return;
@@ -354,19 +359,6 @@ void Tree::bothBlack(Node* removeThis)
     parent->parent = sibling;
     if(parent == root) root = sibling;
   }
-}
-
-//child goes into parent's spot, parent is deleted
-void Tree::replace(Node* removeThis, Node* child)
-{
-  if(removeThis == removeThis->parent->right) removeThis->parent->right = child;
-  else removeThis->parent->left = child;
-  cout << "got here" << endl;
-  child->parent = removeThis->parent;
-    cout << "got here" << endl;
-
-  if(root == removeThis) root = child;
-  delete removeThis;
 }
 
 void Tree::display()

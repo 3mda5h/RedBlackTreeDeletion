@@ -26,7 +26,7 @@ class Tree
   Node* search(int number);
   void preRemove(int number);
   void remove(Node* removeThis);
-  void bothBlack(Node* removeThis);
+  void bothBlack(Node* parent, Node* child);
   void replace(Node* parent, Node* child);
   void display();
   void display_impl(Node* current, int level);
