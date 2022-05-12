@@ -279,7 +279,6 @@ void Tree::bothBlack(Node* parent, Node* node, Node* sibling)
   //2. sibling is red - rotate sibling thru parent
   if(sibling != NULL && strcmp(sibling->color, "red") == 0)
   {
-    Node* parent = sibling->parent;
     if(sibling == sibling->parent->right)
     {
       if(parent->parent != NULL)
@@ -291,6 +290,8 @@ void Tree::bothBlack(Node* parent, Node* node, Node* sibling)
       parent->right = sibling->left;
       sibling->left = parent;
       sibling = parent->right;
+      
+      
     }
     else if(sibling == sibling->parent->left)
     {
@@ -303,6 +304,8 @@ void Tree::bothBlack(Node* parent, Node* node, Node* sibling)
       parent->left = sibling->right;
       sibling->right = parent;
       sibling = parent->left;
+      //need to update what sibling and parent are !!!!
+      sibling = 
     }
   }
   //3. sibling is black
@@ -311,6 +314,8 @@ void Tree::bothBlack(Node* parent, Node* node, Node* sibling)
     sibling->color = "red";
     //case 2 recursive call hehe
     //go back to case 1
+    cout << "after case 3" << endl;
+    display();
     bothBlack(parent, node, sibling);
     
   }
