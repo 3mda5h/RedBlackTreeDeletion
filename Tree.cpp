@@ -228,7 +228,7 @@ void Tree::remove(Node* removeThis)
   if(removeThis->right == NULL) child = removeThis->left;
   else child = removeThis->right;
   //both black
-  if(strcmp(removeThis->color, "black") == 0 && (child == NULL || strcmp(child->color, "black")))
+  if(strcmp(removeThis->color, "black") == 0 && (child == NULL || strcmp(child->color, "black") == 0))
   {
     replace(removeThis, child);
      cout << "after remove:" << endl;
@@ -251,7 +251,7 @@ void Tree::remove(Node* removeThis)
   else if(strcmp(removeThis->color, "red") == 0 || (strcmp(removeThis->color, "black") == 0 && strcmp(child->color, "red") == 0)) 
   {
     replace(removeThis, child);
-    if(strcmp(child->color, "red") == 0) child->color = "black"; //if removeThis was black and child was red
+    if(child != NULL && strcmp(child->color, "red") == 0) child->color = "black"; //if removeThis was black and child was red
   }
 }
 
@@ -273,7 +273,7 @@ void Tree::bothBlack(Node* parent, Node* node, Node* sibling)
   //this is because node's parent was black and he was deleted, decreasing black count by 1
   //node can be NULL 
   //can sibling be null ?? - probably not right??
-
+  
   //1. node is new root
   if(node == root) return;
   //2. sibling is red - rotate sibling thru parent
@@ -286,98 +286,127 @@ void Tree::bothBlack(Node* parent, Node* node, Node* sibling)
       sibling->parent = parent->parent;
     }
     else root = sibling;
-    if(sibling == sibling->parent->right)
+    if(sibling == parent->right)
     { 
       if(sibling == root) sibling->parent = NULL;      
       parent->right = sibling->left;
       sibling->left = parent;
       if(sibling->left != NULL) sibling->left->parent = parent;
+      sibling = parent->right;
     }
-    else if(sibling == sibling->parent->left)
+    else if(sibling == parent->left)
     {
       if(sibling == root) sibling->parent = NULL;
       parent->left = sibling->right;
       sibling->right = parent;
       if(sibling->right != NULL) sibling->right->parent = parent;
+      sibling = parent->left;
     }
-    sibling->color = "black";
+    parent->parent->color = "black";
     parent->color = "red";
     cout << "after case 2:" << endl;
     display();
-    return;
   }
-  //3. sibling is black
-  if(sibling == NULL || strcmp(sibling->color, "black") == 0)
+  //3. sibling is black and so are its kids
+  if((sibling == NULL || strcmp(sibling->color, "black") == 0) && (sibling->right == NULL || strcmp(sibling->right->color, "black") == 0) && 
+    (sibling->left == NULL || strcmp(sibling->left->color, "black") == 0)) //debugger saying parent and sibling are null ??
   {
     sibling->color = "red";
-    //case 2 recursive call hehe
-    //go back to case 1
     cout << "after case 3:" << endl;
     display();
+    //go back to case 1
     bothBlack(parent, node, sibling);
-    
   }
   //4. parent is red sibling and sibling's children are black
   if(strcmp(sibling->color, "black") == 0 && (sibling->left == NULL || strcmp(sibling->left->color, "black") == 0) 
-    && (sibling->right != NULL || strcmp(sibling->right->color, "black") == 0))
+    && (sibling->right != NULL || strcmp(sibling->right->color, "black") == 0) && strcmp(parent->color, "red") == 0)
   {
     parent->color = "black";
     sibling->color = "red";
+    cout << "after case 4:" << endl;
+    display();
+    return;
   }
   //5 - rotate thru sibling
-  if(strcmp(sibling->color, "black") == 0 && (strcmp(sibling->right->color, "red") == 0 ^ strcmp(sibling->left->color, "red") == 0)) //if one of sibling's children is red not both
+  if(strcmp(sibling->color, "black") == 0 && ((sibling->right != NULL && strcmp(sibling->right->color, "red") == 0) ^ 
+    (sibling->left != NULL && strcmp(sibling->left->color, "red") == 0))) //if one of sibling's children is red not both
   {
-    if(sibling == parent->left && strcmp(sibling->right->color, "red") == 0) //sibling left of parent, red child right of sibling
+    if(sibling == parent->left && sibling->right != NULL && strcmp(sibling->right->color, "red") == 0) //sibling left of parent, red child right of sibling
     {
       Node* siblingR = sibling->right;
       sibling->color = "red";
       siblingR->color = "black";
-      parent->right = siblingR;
+      if(parent->parent != NULL)
+      {
+        if(parent == parent->parent->right) parent->parent->right = sibling;
+        else parent->parent->left = sibling;
+        sibling->parent = parent;
+      }
+      parent->left = siblingR;
       siblingR->parent = parent;
       sibling->right = siblingR->left;
+      if(sibling->right != NULL) sibling->right->parent = sibling;
       siblingR->left = sibling;
       sibling->parent = siblingR;
+      sibling = siblingR;
     }
-    else if(sibling == parent->right && strcmp(sibling->left->color, "red") == 0)
+    else if(sibling == parent->right && sibling->left != NULL && strcmp(sibling->left->color, "red") == 0)
     {
       Node* siblingL = sibling->left;
       sibling->color = "red";
-      sibling->left->color = "black";
-      parent->left = siblingL;
+      siblingL->color = "black";
+      if(parent->parent != NULL)
+      {
+        if(parent == parent->parent->right) parent->parent->right = sibling;
+        else parent->parent->left = sibling;
+        sibling->parent = parent;
+      }
+      parent->right = siblingL;
       siblingL->parent = parent;
-      sibling->right = siblingL->left;
-      siblingL->left = sibling;
+      sibling->left = siblingL->right;
+      if(sibling->left != NULL) sibling->left->parent = sibling;
+      siblingL->right = sibling;
       sibling->parent = siblingL;
+      sibling = siblingL;
     }
+    cout << "after case 5:" << endl;
+    display();
   }
   //6 - sibling is black, sibling's left is red, node is right (or directions opposite)
   //rotate thru the parent and 
-  if(strcmp(sibling->color, "black") == 0 && strcmp(sibling->left->color, "red") == 0 && node == parent->right)
+  if(strcmp(sibling->color, "black") == 0 && sibling->left != NULL && strcmp(sibling->left->color, "red") == 0 && node == parent->right)
   {
+    cout << "got here" << endl;
     //parent and sibling colors switch, sibling child becomes black
     if(strcmp(parent->color, "red") == 0) sibling->color = "red";
     parent->color = "black";
     sibling->left->color = "black";
     Node* siblingR = sibling->right;
     parent->left = siblingR;
-    siblingR->parent = parent;
+    if(siblingR != NULL) siblingR->parent = parent;
     sibling->left = parent;
     parent->parent = sibling;
     if(parent == root) root = sibling;
-      
+    cout << "after case 6:" << endl;
+    display();
+    return;
   }
-  else if(strcmp(sibling->color, "black") == 0 && strcmp(sibling->right->color, "red") == 0 && node == parent->left)
+  else if(strcmp(sibling->color, "black") == 0 && sibling->right != NULL && strcmp(sibling->right->color, "red") == 0 && node == parent->left)
   {
-   //parent and sibling colors switch, sibling child becomes black
+   cout << "got hereee" << endl;
+    //parent and sibling colors switch, sibling child becomes black
     if(strcmp(parent->color, "red") == 0) sibling->color = "red";
     parent->color = "black";
     sibling->right->color = "black";
-    Node* siblingL = sibling->left;
-    parent->right = siblingL;
-    siblingL->parent = parent;
-    sibling->right = parent;
+    Node* siblingR = sibling->right;
+    parent->right = sibling->left;
+    if(sibling->left != NULL) sibling->left->parent = parent;
+    sibling->left = parent;
     parent->parent = sibling;
     if(parent == root) root = sibling;
+    cout << "after case 6:" << endl;
+    display();
+    return;
   }
 }
 
