@@ -17,6 +17,7 @@ void Tree::insert(int number)
 //insert a node into tree maintaining red black property
 void Tree::insert_impl(Node* current, int number)
 {
+  cout << "called" << endl;
   //1. inserting root - root must be black
   if(root == NULL)
   {
@@ -64,6 +65,8 @@ void Tree::insert_impl(Node* current, int number)
 //re-establish red-black property
 void Tree::fixInsert(Node* node)
 {
+  cout << "before fix insert:" << endl;
+  display();
   Node* parent = node->parent;
   Node* grandpa = parent->parent;
   Node* uncle;
@@ -77,6 +80,8 @@ void Tree::fixInsert(Node* node)
     Node* current = grandpa;
     while(current != NULL && current->parent != NULL && current->parent->parent != NULL)
     {
+      cout << "current number: " << current->number << endl;
+      cout << "current's parent number: " << current->parent->number << endl;
       fixInsert(current);
       current = current->parent;
     }
@@ -290,6 +295,7 @@ void Tree::bothBlack(Node* parent, Node* node, Node* sibling)
     { 
       if(sibling == root) sibling->parent = NULL;      
       parent->right = sibling->left;
+      parent->parent = sibling;
       sibling->left = parent;
       if(sibling->left != NULL) sibling->left->parent = parent;
       sibling = parent->right;
@@ -299,6 +305,7 @@ void Tree::bothBlack(Node* parent, Node* node, Node* sibling)
       if(sibling == root) sibling->parent = NULL;
       parent->left = sibling->right;
       sibling->right = parent;
+      parent->parent = sibling;
       if(sibling->right != NULL) sibling->right->parent = parent;
       sibling = parent->left;
     }
@@ -309,7 +316,7 @@ void Tree::bothBlack(Node* parent, Node* node, Node* sibling)
   }
   //3. sibling is black and so are its kids
   if((sibling == NULL || strcmp(sibling->color, "black") == 0) && (sibling->right == NULL || strcmp(sibling->right->color, "black") == 0) && 
-    (sibling->left == NULL || strcmp(sibling->left->color, "black") == 0)) //debugger saying parent and sibling are null ??
+    (sibling->left == NULL || strcmp(sibling->left->color, "black") == 0)) 
   {
     sibling->color = "red";
     cout << "after case 3:" << endl;
@@ -336,16 +343,10 @@ void Tree::bothBlack(Node* parent, Node* node, Node* sibling)
       Node* siblingR = sibling->right;
       sibling->color = "red";
       siblingR->color = "black";
-      if(parent->parent != NULL)
-      {
-        if(parent == parent->parent->right) parent->parent->right = sibling;
-        else parent->parent->left = sibling;
-        sibling->parent = parent;
-      }
       parent->left = siblingR;
       siblingR->parent = parent;
       sibling->right = siblingR->left;
-      if(sibling->right != NULL) sibling->right->parent = sibling;
+      if(sibling->left != NULL) sibling->left->parent = sibling;
       siblingR->left = sibling;
       sibling->parent = siblingR;
       sibling = siblingR;
@@ -355,16 +356,10 @@ void Tree::bothBlack(Node* parent, Node* node, Node* sibling)
       Node* siblingL = sibling->left;
       sibling->color = "red";
       siblingL->color = "black";
-      if(parent->parent != NULL)
-      {
-        if(parent == parent->parent->right) parent->parent->right = sibling;
-        else parent->parent->left = sibling;
-        sibling->parent = parent;
-      }
       parent->right = siblingL;
       siblingL->parent = parent;
       sibling->left = siblingL->right;
-      if(sibling->left != NULL) sibling->left->parent = sibling;
+      if(sibling->right != NULL) sibling->right->parent = sibling;
       siblingL->right = sibling;
       sibling->parent = siblingL;
       sibling = siblingL;
@@ -381,10 +376,21 @@ void Tree::bothBlack(Node* parent, Node* node, Node* sibling)
     if(strcmp(parent->color, "red") == 0) sibling->color = "red";
     parent->color = "black";
     sibling->left->color = "black";
-    Node* siblingR = sibling->right;
-    parent->left = siblingR;
-    if(siblingR != NULL) siblingR->parent = parent;
-    sibling->left = parent;
+    if(parent->parent != NULL)
+    {
+      if(parent == parent->parent->right) parent->parent->right = sibling;
+      else parent->parent->left = sibling;
+      sibling->parent = parent->parent;
+    }
+    else 
+    {
+      root = sibling;
+      sibling->parent = NULL;
+    }
+    Node* siblingL = sibling->left;
+    parent->left = sibling->right;
+    if(sibling->right != NULL) sibling->right->parent = parent;
+    sibling->right = parent;
     parent->parent = sibling;
     if(parent == root) root = sibling;
     cout << "after case 6:" << endl;
@@ -398,6 +404,17 @@ void Tree::bothBlack(Node* parent, Node* node, Node* sibling)
     if(strcmp(parent->color, "red") == 0) sibling->color = "red";
     parent->color = "black";
     sibling->right->color = "black";
+    if(parent->parent != NULL)
+    {
+      if(parent == parent->parent->right) parent->parent->right = sibling;
+      else parent->parent->left = sibling;
+      sibling->parent = parent->parent;
+    }
+    else 
+    {
+      root = sibling;
+      sibling->parent = NULL;
+    }
     Node* siblingR = sibling->right;
     parent->right = sibling->left;
     if(sibling->left != NULL) sibling->left->parent = parent;
