@@ -206,8 +206,10 @@ Node* Tree::search(int number)
 void Tree::preRemove(int number)
 {
   Node* removeThis = search(number);
+  if(removeThis == NULL) cout << "this number is not in the tree" << endl;
+  else if(removeThis == root && removeThis->left == NULL && removeThis->right == NULL) delete removeThis; //literally just deleting a tree w/ 1 value in it
   //removeThis has two children - find next smallest number (left once, then right until end)
-  if(removeThis->left != NULL && removeThis->right != NULL)
+  else if(removeThis->left != NULL && removeThis->right != NULL)
   {
     //Node* previous = removeThis;
     Node* nextSmallest = removeThis->left;
@@ -232,10 +234,6 @@ void Tree::remove(Node* removeThis)
   Node* parent = removeThis->parent;
   if(removeThis->right == NULL) child = removeThis->left;
   else child = removeThis->right;
-  if(removeThis == root)
-  {
-    child->parent = NU
-  }
   //both black
   if(strcmp(removeThis->color, "black") == 0 && (child == NULL || strcmp(child->color, "black") == 0))
   {
@@ -261,16 +259,25 @@ void Tree::remove(Node* removeThis)
   {
     replace(removeThis, child);
     if(child != NULL && strcmp(child->color, "red") == 0) child->color = "black"; //if removeThis was black and child was red
+     cout << "after one black one red remove:" << endl;
+    display();
   }
 }
 
 //child goes into parent's spot, parent is deleted
 void Tree::replace(Node* removeThis, Node* child)
 {
-  if(removeThis == removeThis->parent->right) removeThis->parent->right = child;
-  else removeThis->parent->left = child;
-  if(child != NULL) child->parent = removeThis->parent;
-  if(root == removeThis) root = child;
+  if(removeThis != root)
+  {
+    if(removeThis == removeThis->parent->right) removeThis->parent->right = child;
+    else removeThis->parent->left = child;
+    if(child != NULL) child->parent = removeThis->parent;
+  }
+  else
+  {
+    child->parent = NULL;
+    root = child;
+  }
   delete removeThis;
 }
 
@@ -284,10 +291,11 @@ void Tree::bothBlack(Node* parent, Node* node, Node* sibling)
   //can sibling be null ?? - probably not right??
   
   //1. node is new root
-  if(parent == root) return;
+  if(node == root) return;
   //2. sibling is red - rotate sibling thru parent
   if(sibling != NULL && strcmp(sibling->color, "red") == 0)
   {
+    if(node == NULL && sibling->left == NULL && sibling->right == NULL) return; //in this case were actually done
     if(parent->parent != NULL)
     {
       if(parent == parent->parent->left) parent->parent->left = sibling;
@@ -320,11 +328,9 @@ void Tree::bothBlack(Node* parent, Node* node, Node* sibling)
     cout << "after case 2:" << endl;
     display();
   }
-  cout << "after case 2 sibling is " << sibling->number << endl;
-  cout << "after case 2 parent is " << sibling->parent->number << endl;
 
   //3. sibling is black and so are its kids
-  if((sibling == NULL || strcmp(sibling->color, "black") == 0) && (sibling->right == NULL || strcmp(sibling->right->color, "black") == 0) && 
+  if((sibling != NULL && strcmp(sibling->color, "black") == 0) && (sibling->right == NULL || strcmp(sibling->right->color, "black") == 0) && 
     (sibling->left == NULL || strcmp(sibling->left->color, "black") == 0)) 
   {
     sibling->color = "red";
@@ -334,11 +340,9 @@ void Tree::bothBlack(Node* parent, Node* node, Node* sibling)
     //go back to case 1
     bothBlack(parent, node, sibling);
   }
-  cout << "after case 3 sibling is " << sibling->number << endl;
-  cout << "after case 3 parent is " << sibling->parent->number << endl;
-
+  cout << "after case 3" << endl;
   //4. parent is red sibling and sibling's children are black
-  if(strcmp(sibling->color, "black") == 0 && (sibling->left == NULL || strcmp(sibling->left->color, "black") == 0) 
+  if(sibling != NULL && strcmp(sibling->color, "black") == 0 && (sibling->left == NULL || strcmp(sibling->left->color, "black") == 0) 
     && (sibling->right != NULL || strcmp(sibling->right->color, "black") == 0) && strcmp(parent->color, "red") == 0)
   {
     parent->color = "black";
@@ -347,11 +351,10 @@ void Tree::bothBlack(Node* parent, Node* node, Node* sibling)
     display();
     return;
   }
-  cout << "after case 4 sibling is " << sibling->number << endl;
-  cout << "after case 4 parent is " << sibling->parent->number << endl;
+  cout << "after case 4" << endl;
 
   //5 - rotate thru sibling
-  if(strcmp(sibling->color, "black") == 0 && ((sibling->right != NULL && strcmp(sibling->right->color, "red") == 0) ^ 
+  if(sibling != NULL && strcmp(sibling->color, "black") == 0 && ((sibling->right != NULL && strcmp(sibling->right->color, "red") == 0) ^ 
     (sibling->left != NULL && strcmp(sibling->left->color, "red") == 0))) //if one of sibling's children is red not both
   {
     if(sibling == parent->left && sibling->right != NULL && strcmp(sibling->right->color, "red") == 0) //sibling left of parent, red child right of sibling
@@ -383,12 +386,11 @@ void Tree::bothBlack(Node* parent, Node* node, Node* sibling)
     cout << "after case 5:" << endl;
     display();
   }
-  cout << "after case 5 sibling is " << sibling->number << endl;
-  cout << "after case 5 parent is " << sibling->parent->number << endl;
+  cout << "after case 5" << endl;
 
   //6 - sibling is black, sibling's left is red, node is right (or directions opposite)
   //rotate thru the parent and 
-  if(strcmp(sibling->color, "black") == 0 && sibling->left != NULL && strcmp(sibling->left->color, "red") == 0 && node == parent->right)
+  if(sibling != NULL && strcmp(sibling->color, "black") == 0 && sibling->left != NULL && strcmp(sibling->left->color, "red") == 0 && node == parent->right)
   {
     cout << "got here" << endl;
     //parent and sibling colors switch, sibling child becomes black
@@ -416,7 +418,7 @@ void Tree::bothBlack(Node* parent, Node* node, Node* sibling)
     display();
     return;
   }
-  else if(strcmp(sibling->color, "black") == 0 && sibling->right != NULL && strcmp(sibling->right->color, "red") == 0 && node == parent->left)
+  else if(sibling != NULL && strcmp(sibling->color, "black") == 0 && sibling->right != NULL && strcmp(sibling->right->color, "red") == 0 && node == parent->left)
   {
    cout << "got hereee" << endl;
     //parent and sibling colors switch, sibling child becomes black
@@ -454,7 +456,8 @@ void Tree::display()
 //displays tree visually using tabs
 void Tree::display_impl(Node* current, int level)
 { 
-  if(current == NULL && level == 0)
+  if(root == NULL) cout << "There's no tree to display D:" << endl;
+  else if(current == NULL && level == 0)
   {
     cout << "Tree is empty :(" << endl;
     return;
