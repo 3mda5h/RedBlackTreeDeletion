@@ -77,8 +77,8 @@ void Tree::fixInsert(Node* node)
     Node* current = grandpa;
     while(current != NULL && current->parent != NULL && current->parent->parent != NULL)
     {
-      cout << "current number: " << current->number << endl;
-      cout << "current's parent number: " << current->parent->number << endl;
+      //cout << "current number: " << current->number << endl;
+      //cout << "current's parent number: " << current->parent->number << endl;
       fixInsert(current);
       current = current->parent;
     }
@@ -239,8 +239,8 @@ void Tree::remove(Node* removeThis)
   if(strcmp(removeThis->color, "black") == 0 && (child == NULL || strcmp(child->color, "black") == 0))
   {
     replace(removeThis, child);
-     cout << "after remove:" << endl;
-    display();
+    //cout << "after remove:" << endl;
+    //display();
     //now get sibling so we can call both black
     Node* sibling;  
     if(child == NULL) //if node is null the sibling is the non null chld of parent
@@ -254,13 +254,14 @@ void Tree::remove(Node* removeThis)
       else sibling = child->parent->left;
     }
     bothBlack(parent, child, sibling); //passing in the parent bc the child could be null
+    display();
   }
   //one black the other red
   else if(strcmp(removeThis->color, "red") == 0 || (strcmp(removeThis->color, "black") == 0 && strcmp(child->color, "red") == 0)) 
   {
     replace(removeThis, child);
     if(child != NULL && strcmp(child->color, "red") == 0) child->color = "black"; //if removeThis was black and child was red
-     cout << "after one black one red remove:" << endl;
+     //cout << "after one black one red remove:" << endl;
     display();
   }
 }
@@ -327,7 +328,7 @@ void Tree::bothBlack(Node* parent, Node* node, Node* sibling)
     }
     parent->parent->color = "black";
     parent->color = "red";
-    //cout << "after case 2:" << endl;
+    cout << "after case 2:" << endl;
     //display();
   }
   //if(sibling != NULL) cout << "after case 2 sibling is " << sibling->number << endl;
@@ -339,24 +340,25 @@ void Tree::bothBlack(Node* parent, Node* node, Node* sibling)
     sibling->color = "red";
     //if(strcmp(parent->color, "red") == 0) parent->color = "black";
     cout << "after case 3:" << endl;
-    display();
+    //display();
     //go back to case 1
     bothBlack(parent, node, sibling);
     return;
   }
-  if(sibling != NULL) cout << "after case 3 sibling is " << sibling->number << endl;
-  else cout << "after case 3 sibling is null" << endl;  //4. parent is red sibling and sibling's children are black
+  //if(sibling != NULL) cout << "after case 3 sibling is " << sibling->number << endl;
+  //else cout << "after case 3 sibling is null" << endl;  
+  //4. parent is red sibling and sibling's children are black
   if(sibling != NULL && strcmp(sibling->color, "black") == 0 && (sibling->left == NULL || strcmp(sibling->left->color, "black") == 0) 
     && (sibling->right != NULL || strcmp(sibling->right->color, "black") == 0) && strcmp(parent->color, "red") == 0)
   {
     parent->color = "black";
     sibling->color = "red";
-    //cout << "after case 4:" << endl;
+    cout << "after case 4:" << endl;
     //display();
     return;
   }
-if(sibling != NULL) cout << "after case 3 sibling is " << sibling->number << endl;
-  else cout << "after case 3 sibling is null" << endl;
+  //if(sibling != NULL) cout << "after case 3 sibling is " << sibling->number << endl;
+  //else cout << "after case 3 sibling is null" << endl;
   //5 - rotate thru sibling
   if(sibling != NULL && strcmp(sibling->color, "black") == 0 && ((sibling->right != NULL && strcmp(sibling->right->color, "red") == 0) ^ 
     (sibling->left != NULL && strcmp(sibling->left->color, "red") == 0))) //if one of sibling's children is red not both
@@ -387,7 +389,7 @@ if(sibling != NULL) cout << "after case 3 sibling is " << sibling->number << end
       sibling->parent = siblingL;
       sibling = siblingL;
     }
-    //cout << "after case 5:" << endl;
+    cout << "after case 5:" << endl;
     //display();
   }
 //if(sibling != NULL) cout << "after case 5 sibling is " << sibling->number << endl;
@@ -396,7 +398,7 @@ if(sibling != NULL) cout << "after case 3 sibling is " << sibling->number << end
   //rotate thru the parent and 
   if(sibling != NULL && strcmp(sibling->color, "black") == 0 && sibling->left != NULL && strcmp(sibling->left->color, "red") == 0 && node == parent->right)
   {
-    cout << "got here" << endl;
+    //cout << "got here" << endl;
     //parent and sibling colors switch, sibling child becomes black
     if(strcmp(parent->color, "red") == 0) sibling->color = "red";
     parent->color = "black";
@@ -418,7 +420,7 @@ if(sibling != NULL) cout << "after case 3 sibling is " << sibling->number << end
     sibling->right = parent;
     parent->parent = sibling;
     if(parent == root) root = sibling;
-    //cout << "after case 6:" << endl;
+    cout << "after case 6:" << endl;
     //display();
     return;
   }
@@ -446,7 +448,7 @@ if(sibling != NULL) cout << "after case 3 sibling is " << sibling->number << end
     sibling->left = parent;
     parent->parent = sibling;
     if(parent == root) root = sibling;
-    //cout << "after case 6:" << endl;
+    cout << "after case 6:" << endl;
     //display();
     return;
   }

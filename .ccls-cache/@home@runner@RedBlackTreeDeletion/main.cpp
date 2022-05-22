@@ -82,6 +82,7 @@ void consoleInput(Tree* tree)
     }
   }
   cout << "Insert successful" << endl;
+  tree->display();
 }
 
 //read in list of numbers seperated by spaces from a file
@@ -102,4 +103,5 @@ void fileInput(Tree* tree)
     tree->insert(number);
   }
   cout << "Insert successful" << endl;
+  tree->display();
 }
