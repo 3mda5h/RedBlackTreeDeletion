@@ -6,8 +6,9 @@
      - Every simple path from a given node to any of its descendant leaves 
        contains the same number of black nodes.
 this balances the bst
+insertion AND deletion
 Emily MacPherson
-4/29/22
+5/22/22
 */
 
 #include <iostream>
