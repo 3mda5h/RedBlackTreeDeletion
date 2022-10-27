@@ -31,6 +31,7 @@ int main()
   {
     cout << "Enter ADD, READ, DISPLAY, REMOVE, SEARCH or QUIT" << endl;
     cin.getline(input, 100);
+    for(int i = 0; i < strlen(input); i++) input[i] = tolower(input[i]);
     if(strcmp(input, "add") == 0) consoleInput(tree); 
     else if(strcmp(input, "read") == 0) fileInput(tree);
     else if(strcmp(input, "remove") == 0)

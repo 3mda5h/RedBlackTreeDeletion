@@ -72,6 +72,8 @@ void Tree::fixInsert(Node* node)
   //3. parent and uncle of node are red - change parent and uncle to black, grandparent to red
   if(strcmp(node->color, "red") == 0 && strcmp(parent->color, "red") == 0 && uncle != NULL && strcmp(uncle->color, "red") == 0)
   {    
+    //cout << "before case 3:" << endl;
+    //display();    
     caseThreeIns(node);
     //fix tree higher up
     Node* current = grandpa;
@@ -80,12 +82,18 @@ void Tree::fixInsert(Node* node)
       fixInsert(current);
       current = current->parent;
     }
+    //cout << "after case 3:" << endl;
+    //cout << "parent is " << parent->number << endl;
+    //cout << "node is " << node->number << endl;
+    //display();
   }
   else if(strcmp(node->color, "red") == 0 && strcmp(parent->color, "red") == 0 && (uncle == NULL || strcmp(uncle->color, "black") == 0)) //NULL is black
   {
     //4. uncle is black 
     if(parent == grandpa->left && node == parent->right) //parent is left of grandpa and node is right of parent
     {
+      //cout << "before case 4:" << endl;
+      //display();
       //tree rotation - node goes to parent's spot 
       grandpa->left = node;
       node->parent = grandpa;
@@ -101,9 +109,13 @@ void Tree::fixInsert(Node* node)
       //update uncle
       if(parent == grandpa->left) uncle = grandpa->right;
       else uncle = grandpa->left;
+      //cout << "after case 4:" << endl;
+      //display();
     }
     else if(parent == grandpa->right && node == parent->left) //parent is right of grandpa and node is left of parent
     {
+      //cout << "before case 4:" << endl;
+      //display();
       //tree rotation - node goes to parent's spot 
       grandpa->right = node;
       node->parent = grandpa;
@@ -119,11 +131,17 @@ void Tree::fixInsert(Node* node)
       //update uncle
       if(parent == grandpa->left) uncle = grandpa->right;
       else uncle = grandpa->left;
+      //cout << "after case 4:" << endl;
+      //display();
     }
     if(node->parent == grandpa->left && node == parent->left) // parent left node left
     {
       //5 - (happens after case 4) - grandparent and uncle are black
       //grandparent becomes red, parent becomes black
+      //cout << "before case 5:" << endl;
+      //cout << "parent is " << parent->number << endl;
+      //cout << "node is " << node->number << endl;
+      //display();
       grandpa->color = "red";
       parent->color = "black";
       //parent takes the place of grandpa
@@ -140,11 +158,18 @@ void Tree::fixInsert(Node* node)
       parent->right = grandpa;
       grandpa->parent = parent;
       if(root == grandpa) root = parent; //if granpa was old root parent is now root
+      //cout << "after case 5:" << endl;
+      //display();
     }
     if(node->parent == grandpa->right && node == parent->right) //parent rght node right
     {
       //5 - (happens after case 4) - grandparent and uncle are black
       //grandparent becomes red, parent becomes black
+      //cout << "before case 5:" << endl;
+      //cout << "parent is " << parent->number << endl;
+      //cout << "node is " << node->number << endl;
+      //display();
+      //display();
       grandpa->color = "red";
       parent->color = "black";
       //parent takes the place of grandpa
@@ -161,6 +186,8 @@ void Tree::fixInsert(Node* node)
       parent->left = grandpa;
       grandpa->parent = parent;
       if(root == grandpa) root = parent; //if granpa was old root parent is now root
+      //cout << "after case 5:" << endl;
+      //display();
     }
   }
 }
@@ -246,16 +273,16 @@ void Tree::remove(Node* removeThis)
       else sibling = child->parent->left;
     }
     bothBlack(parent, child, sibling); //passing in the parent bc the child could be null
-    cout << "After removal:" << endl;
-    display();
+    //cout << "After removal:" << endl;
+    //display();
   }
   //one black the other red
   else if(strcmp(removeThis->color, "red") == 0 || (strcmp(removeThis->color, "black") == 0 && strcmp(child->color, "red") == 0)) 
   {
     replace(removeThis, child);
     if(child != NULL && strcmp(child->color, "red") == 0) child->color = "black"; //if removeThis was black and child was red
-    cout << "After removal:" << endl;
-    display();
+    //cout << "After removal:" << endl;
+    //display();
   }
 }
 
